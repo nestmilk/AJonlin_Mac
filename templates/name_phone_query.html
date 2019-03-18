@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+<head>
+    <meta charset="UTF-8">
+    <title>艾进疫苗进度查询</title>
+    <style type="text/css">
+        form{
+            position: absolute;
+            top: 200px;
+
+        }
+        label{
+            font-size: 80px;
+        }
+        input{
+            width: 400px;
+            height: 80px;
+            font-size: 60px;
+        }
+        .error{
+            font-size: 40px;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <form id="name_phone_queryForm" method="post" action="{% url 'query_result' %}">
+        <div class="center">
+            <label>患者姓名：</label>
+            <input type="text" name="nick_name" value="{{ nick_name }}" />
+            <div class="error" id="name_error_tip">{{ errors.nick_name }}</div>
+        </div>
+        <div  class="center">
+            <label>联系电话：</label>
+            <input type="text" name="mobile" value="{{ mobile }}" />
+            <div class="error" id="phone_error_tip">{{ errors.mobile }}</div>
+        </div>
+        <div  class="center">
+            <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+            <input type="submit" value="查询" />
+            <div class="error" id="query_error_tip">{{ msg }}</div>
+        </div>
+        {% csrf_token %}
+    </form>
+</body>
+</html>

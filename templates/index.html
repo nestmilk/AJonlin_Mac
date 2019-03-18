@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}艾进后台首页{% endblock %}
+
+{% block custom_css %}
+    <style>
+
+
+        body{margin: 0;
+            background-color: white;
+        }
+        .example {
+            width: 1000px;
+            height: 500px;
+            font-size: 40px;
+            text-align: center;
+            margin: 20px auto;
+            background-color: #464576;
+        }
+        .carousel-item{
+            line-height: 500px;
+            color: #fff;
+        }
+    </style>
+    <link rel="stylesheet" href="{% static 'css/ft-carousel.css' %}" type="text/css">
+{% endblock %}
+
+{% block content %}
+
+    <div class="example">
+        <div class="ft-carousel" id="carousel_1">
+            <ul class="carousel-inner">
+            {% for banner in all_banners %}
+                <li class="carousel-item"><a href="{{ banner.url }}" target="_blank"><img src="{{ MEDIA_URL }}{{ banner.image }}" /></a></li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block custom_js %}
+    <script type="text/javascript" src="{% static 'js/ft-carousel.min.js' %}"></script>
+    <script type="text/javascript">
+        $("#carousel_1").FtCarousel({
+
+        });
+        $("#carousel_3").FtCarousel({
+            index: 0,
+            auto: true,
+            time: 3000,
+            indicators: false,
+            buttons: true
+        });
+    </script>
+{% endblock %}

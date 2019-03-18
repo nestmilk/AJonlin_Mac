@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>疫苗进度</title>
+    <style>
+        body{
+            font-size: 25px;
+        }
+        table, td, th{
+            border: 1px solid black;
+            padding: 5px;
+        }
+        table{
+            border-collapse: collapse;
+        }
+
+    </style>
+</head>
+<body>
+    <div>尊敬的{{ patient.nick_name }}，您好：</div><br>
+    <div>
+        免疫新抗原疫苗的进度如下,
+    </div><br>
+    <div>
+        <div>
+            &diams;测序实验进度：
+        </div>
+        {% if all_experiments %}
+            <table>
+                <th>序号</th>
+                <th>实验编号</th>
+                <th>实验类型</th>
+                <th>开始日期</th>
+                <th>结束日期</th>
+                <th>实验状态</th>
+                {% for experiment in all_experiments %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ experiment.name }}</td>
+                        <td>{{ experiment.get_experiment_type_display }}</td>
+                        <td>{{ experiment.add_time | date:'Y-m-d'}}</td>
+                        <td>{{ experiment.finish_time | date:'Y-m-d' }}</td>
+                        <td>{{ experiment.get_status_display }}</td>
+                    </tr>
+                {% endfor %}
+            </table><br>
+        {% else %}
+            ......尚未开始......<br>
+        {% endif %}
+    </div>
+    <div>
+        <div>
+            &diams;数据分析进度：
+        </div>
+
+        {% if all_analyses %}
+             <table>
+            <th>序号</th>
+            <th>分析编号</th>
+            <th>开始日期</th>
+            <th>结束日期</th>
+            <th>分析状态</th>
+            {% for analysis in all_analyses %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ analysis.name }}</td>
+                <td>{{ analysis.add_time | date:'Y-m-d' }}</td>
+                <td>{{ analysis.finish_time | date:'Y-m-d'}}</td>
+                <td>{{ analysis.get_status_display }}</td>
+            </tr>
+            {% endfor %}
+        </table><br>
+        {% else %}
+            ......尚未开始......<br>
+        {% endif %}
+    </div>
+
+    <div>
+        <div>
+            &diams;多肽合成进度：
+        </div>
+        {% if all_peptides %}
+            <table>
+                <th>序号</th>
+                <th>多肽编号</th>
+                <th>开始时间</th>
+                <th>结束时间</th>
+                <th>合成状态</th>
+                {% for peptide in all_peptides %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ peptide.name }}</td>
+                        <td>{{ peptide.add_time | date:'Y-m-d' }}/td>
+                        <td>{{ peptide.finish_time | date:'Y-m-d' }}</td>
+                        <td>{{ peptide.get_status_display }}</td>
+                    </tr>
+                {% endfor %}
+            </table><br>
+        {% else %}
+            ......尚未开始......<br>
+        {% endif %}
+    </div>
+
+    <div>
+        <div>
+            &diams;疫苗制备进度：
+        </div>
+        <table>
+            {% if all_vaccines %}
+                <table>
+                    <th>序号</th>
+                    <th>制备编号</th>
+                    <th>开始时间</th>
+                    <th>结束时间</th>
+                    <th>制备状态</th>
+                    <th>快递信息</th>
+                {% for vaccine in all_vaccines %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ vaccine.name }}</td>
+                        <td>{{ vaccine.add_time | date:'Y-m-d' }}</td>
+                        <td>{{ vaccine.finish_time | date:'Y-m-d' }}</td>
+                        <td>{{ vaccine.get_status_display }}</td>
+                        <td>{{ vaccine.get_express_company_display}}:{{ vaccine.express_number }}</td>
+                    </tr>
+                {% endfor %}
+                </table><br>
+            {% else %}
+                ......尚未开始......<br>
+            {% endif %}
+        </table>
+    </div>
+
+</body>
+</html>

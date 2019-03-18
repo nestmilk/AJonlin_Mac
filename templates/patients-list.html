@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}订单总览{% endblock %}
+{% block custom_css %}
+    <style>
+        .list {
+            position: relative;
+            top: 0;
+            left: 0;
+            background: #f6f6f6;
+            border-bottom: 1px solid #f6f6f6;
+            padding-top: 10px;
+        }
+
+        .pageturn {
+            clear: both;
+            height: 30px;
+            margin: 50px auto;
+            display: table;
+            text-align: center;
+        }
+
+        .pageturn .pagelist {
+            display: table-cell;
+            vertical-align: middle;
+            overflow: hidden;
+        }
+
+        .pageturn li {
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            margin-left: 10px;
+            float: left;
+            text-align: center;
+            list-style: none;
+        }
+
+        .pageturn li:first-child {
+            margin-left: 0;
+        }
+
+        .pageturn li:hover a, .pageturn .active a {
+            background: #717171;
+            color: #fff;
+            border-color: #eaeaea;
+        }
+
+        .pageturn a {
+            border: 1px solid #eaeaea;
+            display: block;
+            height: 28px;
+            color: #6c6c6c;
+        }
+
+        .pageturn .long {
+            width: 100px;
+        }
+
+        .pageturn .none a {
+            border: 0;
+        }
+
+        .pageright {
+            float: right;
+            width: auto;
+            display: inline;
+            clear: none;
+            margin-top: 10px;
+        }
+
+        table, td, th{
+            border: 1px solid black;
+            padding: 5px;
+        }
+        table{
+            border-collapse: collapse;
+        }
+        .dialogbox
+        {
+            width: 800px;
+            background: pink;
+            left: 20%;
+            top: 10%;
+            display:none;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="list wp">
+        <button id="addPatientBtn">添加病人信息</button>
+        <div class="dialogbox" id="addPatientDialog" >
+            <form autocomplete="off" id="jsAddPatientForm" >
+                <div>
+                    <label>病人编号：
+                        <input type="text" name="name" />
+                    </label>
+                </div>
+                <div>
+                    <label>姓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;名：
+                        <input type="text" name="nick_name" />
+                    </label>
+                </div>
+                <div>
+                    <label>年&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;龄：
+                        <input type="text" name="age" />
+                    </label>
+                </div>
+                <div>
+                    <label>性&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;别：</label>
+                    <select name="gender">
+                        <option value="male" selected="selected" >男</option>
+                        <option value="female" >女</option>
+                    </select>
+                </div>
+                <div>
+                    <label>身份证号：
+                        <input type="text" name="id_card" />
+                    </label>
+                </div>
+                <div>
+                    <label>地&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;址：
+                        <input type="text" name="address" />
+                    </label>
+                </div>
+                <div>
+                    <label>诊断结果：
+                        <input type="text" name="diagnosis" />
+                    </label>
+                </div>
+                <div>
+                    <label>手&nbsp;&nbsp;机&nbsp;&nbsp;号：
+                        <input type="text" name="mobile" />
+                    </label>
+                </div>
+                <label>添加时间：
+                    <input type="text" name="add_time" id="patient_add_time" value="{{ patient.add_time | date:'Y-m-d'}}" />
+                </label>
+                <div id="add_patient_tip"></div>
+                <div>
+                    <input type="button" id="jsAddPatientBtn" value="保存" />
+                    <input type="button" id="jsAddPatientCancelBtn" value="取消" />
+                </div>
+            {% csrf_token %}
+            </form>
+        </div>
+        <div>
+            <table>
+                <tr>
+                    <th>病人信息</th>
+                    <th>订单信息</th>
+                    <th>样本信息</th>
+                    <th>实验信息</th>
+                    <th>分析信息</th>
+                    <th>多肽信息</th>
+                    <th>疫苗信息</th>
+                </tr>
+
+
+                {% for patient in all_patients.object_list %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'patient_detail' patient.id %}">
+                                <div>
+                                    {{ patient.nick_name }}&nbsp;{{ patient.get_gender_display }}&nbsp;{{ patient.age }}岁
+                                </div>
+                            </a>
+                        </td>
+                        <td>
+                            {% for deal in patient.deal_set.all %}
+                                {{ deal.price }}元&nbsp;{{ deal.get_pay_status_display }}&nbsp;发票{{ deal.invoice | default:'*' }}<br>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% for specimen in patient.specimen_set.all %}
+                                {{ specimen.get_sample_type_display }}&nbsp;{{ specimen.num }}
+                                {% if specimen.sample_type == 'ParaffinSlice' %}
+                                    片
+                                {% elif specimen.sample_type == 'BLOOD' %}
+                                    管
+                                {% else %}
+                                    块
+                                {% endif %}<br>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% for experiment in patient.experiment_set.all %}
+                                {{ experiment.get_experiment_type_display }}&nbsp;{{ experiment.get_result_status_display }}&nbsp;{{ experiment.price }}元&nbsp;{{ experiment.get_pay_status_display }}<br>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% for analysis in patient.analysis_set.all %}
+                                {{ analysis.get_status_display }}<br>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% for peptide in patient.peptide_set.all %}
+                                {{ peptide.num }}条&nbsp;{{ peptide.get_status_display }}&nbsp;{{ peptide.price }}元&nbsp;{{ peptide.get_pay_status_display }}<br>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% for vaccine in patient.vaccine_set.all %}
+                                {{ vaccine.get_status_display }}&nbsp;{{ vaccine.get_express_company_display }}&nbsp;{{ vaccine.express_number }}<br>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+    <div class="pageturn">
+        <ul class="pagelist">
+            {% if all_patients.has_previous %}
+                <li class="long"><a href="?{{ all_patients.previous_page_number.querystring }}">上一页</a></li>
+            {% endif %}
+            {% for page in all_patients.pages %}
+                {% if page %}
+                    {% ifequal page all_patients.number %}
+                         <li class="active"><a href="?{{ page.querystring }}">{{ page }}</a></li>
+                    {% else %}
+                         <li><a href="?{{ page.querystring }}">{{ page }}</a></li>
+                    {% endifequal %}
+                {% else %}
+                    <li class="none"><a href="">...</a></li>
+                {% endif %}
+            {% endfor %}
+            {% if all_patients.has_next %}
+                <li class="long"><a href="?{{ all_patients.next_page_number.querystring }}" class="next">下一页</a></li>
+            {% endif %}
+        </ul>
+    </div>
+{% endblock %}
+{% block custom_js %}
+    <script type="text/javascript">
+        laydate.render({
+            elem: '#patient_add_time',
+            format: 'yyyy-MM-dd',
+        });
+
+        $('#addPatientBtn').on('click',function(){
+            $('#addPatientDialog').show()
+        });
+
+        $('#jsAddPatientBtn').on('click',function(){
+            var _self = $(this),
+                $jsAddPatientForm=$('#jsAddPatientForm'),
+                $add_patient_tip = $('#add_patient_tip');
+            $.ajax({
+                cache: false,
+                type: 'post',
+                dataType: 'json',
+                url: "/add_patient/",
+                data: $jsAddPatientForm.serialize(),
+                async: true,
+                beforeSend: function(XMLHttpRequest){
+                    _self.val("保存中...");
+                    _self.attr('disabled', true);
+                },
+                success: function(data){
+                    if(data.status == 'success'){
+                        $add_patient_tip.html('病人信息添加成功');
+                        setTimeout(function(){
+                            window.location.href = window.location.href;
+                            },1500);
+                    }else if (data.status == 'fail') {
+                        $add_patient_tip.html('');
+                        if (data.errors.name) {
+                            $add_patient_tip.append("病人编号："+ data.errors.name + "<br>")
+                        }
+                        if (data.errors.age) {
+                            $add_patient_tip.append("年龄："+ data.errors.age + "<br>")
+                        }
+                        if (data.errors.id_card) {
+                            $add_patient_tip.append("身份证号："+ data.errors.id_card + "<br>")
+                        }
+                        if (data.errors.mobile) {
+                            $add_patient_tip.append("手机号："+ data.errors.mobile + "<br>")
+                        }
+                        if (data.errors.add_time) {
+                            $add_patient_tip.append("添加时间：" + data.errors.add_time + "<br>" )
+                        }
+                        $add_patient_tip.append(
+                            '病人信息添加失败！'
+                        );
+                    }
+                },
+                complete: function(XMLHttpRequest) {
+                    _self.val("保存");
+                    _self.removeAttr("disabled");
+                }
+            })
+        })
+
+        $('#jsAddPatientCancelBtn').on('click',function(){
+            $('#jsAddPatientForm label input').val('');
+            $('#add_patient_tip').html('');
+            $('#addPatientDialog').css("display","none");
+        })
+    </script>
+{% endblock %}
+

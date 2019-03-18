@@ -1,0 +1,108 @@
+#sidebar{
+    position: fixed;
+    left: 3px;
+    top: 220px;
+    width: 70px;
+    height: 350px;
+}
+#sidebar .bar_item{
+    width: 65px;
+    height: 35px;
+    line-height: 35px;
+    text-align: center;
+    font-size: 14px;
+    color: white;
+    margin: 2px auto;
+    position: relative;
+    border-radius: 8px;
+    background: #ff7d83;
+}
+
+#patient_right{
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%;
+    float:right;
+}
+.file_wrapper{
+    margin-top: 3px;
+    font-size: 0px;
+    height: 70px;
+}
+.file_title{
+    width: 50px;
+    height: 62px;
+    line-height: 62px;
+    font-size: 12px;
+    text-align: center;
+    display:inline-block;
+    vertical-align: top;
+}
+.file_item{
+    display:inline-block;
+    font-size: 12px;
+    width: 42px;
+    height: 64px;
+    margin-right: 2px;
+}
+.file_name{
+    width: 40px;
+    height: 14px;
+    color: black;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.apply{
+    width: 40px;
+    height: 48px;
+    line-height: 15px;
+    text-align: center;
+    background: url(../images/apply.png) no-repeat;
+    background-size: 40px 48px;
+    display: table;
+    border: 1px solid darkgoldenrod;
+}
+.cell {
+    display: table-cell;
+    vertical-align: middle;
+}
+.record{
+    width: 40px;
+    height: 48px;
+    text-align: center;
+    line-height: 15px;
+    background: url(../images/MedRecord.jpg) no-repeat;
+    background-size: 40px 48px;
+    display: table;
+    border: 1px solid darkgoldenrod;
+}
+.box div
+{
+    padding: 2px;
+}
+.box
+{
+    border-bottom: 1px solid black;
+    margin: 5px auto;
+}
+.box span
+{
+    margin: 2px;
+    width: 250px;
+    display: inline-block;
+}
+
+.box input[type=button] :hover
+{
+    background: yellowgreen;
+}
+.dialogbox
+{
+    width: 1000px;
+    background: pink;
+    left: 20%;
+    top: 10%;
+    display:none;
+}

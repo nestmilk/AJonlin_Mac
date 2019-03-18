@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+    <h1>上传文件失败！</h1><br>
+    {% for key, error in errors.items %}
+        {{ key }}: {{ error }}<br>
+    {% endfor %}
+    将于<span id="totalSecond">3</span>秒内，跳转{{ url }}！
+
+    <script language="javascript" type="text/javascript">
+        var second = totalSecond.innerText;
+        setInterval("redirect()", 1000);
+        function redirect(){
+            totalSecond.innerText=--second;
+            if(second==0) location.href='{{ url }}';
+        }
+    </script>
+</body>
+</html>

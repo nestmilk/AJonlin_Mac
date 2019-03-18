@@ -1,0 +1,1594 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}病人信息{% endblock %}
+{% block custom_css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/patient_detail.css' %}" />
+{% endblock %}
+{% block content %}
+    <div id="sidebar">
+        <div class="bar_item"><a style="color:white" href="#patient_district">病人信息</a></div>
+        <div class="bar_item"><a style="color:white" href="#specimen_district">样本信息</a></div>
+        <div class="bar_item"><a style="color:white" href="#deal_district">订单信息</a></div>
+        <div class="bar_item"><a style="color:white" href="#experiment_district">实验信息</a></div>
+        <div class="bar_item"><a style="color:white" href="#analysis_district">分析信息</a></div>
+        <div class="bar_item"><a style="color:white" href="#peptide_district">多肽信息</a></div>
+        <div class="bar_item"><a style="color:white" href="#vaccine_district">疫苗信息</a></div>
+
+    </div>
+    {# 病人区域 start #}
+    <div id="patient_district" class="wp">
+        <form class='box' id="editPatientForm">
+            <h1>病人信息</h1>
+            <div>
+                <label>病人编号：
+                    <input type="text" name="name" value="{{ patient.name }}" />
+                </label>
+            </div>
+            <div>
+                <label>姓名：
+                    <input type="text" name="nick_name" value="{{ patient.nick_name }}" />
+                </label>
+                <label>年龄：
+                    <input type="text" name="age" value="{{ patient.age | default:''}}" />
+                </label>
+                <label>性别：</label>
+                <select name="gender">
+                    <option value="male"
+                            {% if patient.gender == 'male' %}selected="selected"{% endif %}>男</option>
+                    <option value="female"
+                            {% if patient.gender == 'female' %}selected="selected"{% endif %}>女</option>
+                </select>
+
+            </div>
+            <div>
+                <label>身份证号：
+                    <input type="text" name="id_card" value="{{ patient.id_card }}" />
+                </label>
+                <label>地址：
+                    <input type="text" name="address" value="{{ patient.address }}" />
+                </label>
+            </div>
+            <div>
+                <label>诊断结果：
+                    <input type="text" name="diagnosis" value="{{ patient.diagnosis }}" />
+                </label>
+                <label>手机号：
+                    <input type="text" name="mobile" value="{{ patient.mobile }}" />
+                </label>
+                <label>添加时间：
+                    <input type="text" name="add_time" id="patient_add_time" value="{{ patient.add_time | date:'Y-m-d'}}" />
+                </label>
+            </div>
+            <input type="hidden" name="patient_id" value="{{ patient.id }}" />
+            <div id="edit_patient_tip"></div>
+            {% csrf_token %}
+            <div>
+                <input type="button" id="jsEditPatientBtn" value="修改病人信息" />
+            </div>
+        </form>
+        <div id="patient_right">
+            
+            <button id="uploadFileBtn">上传文件</button>
+            <div class="dialogbox" id="uploadFileDialog" >
+                <form autocomplete="off" id="jsUploadFileForm" enctype="multipart/form-data" method="post" action="{% url 'files:upload_file' %}" >
+                    <div>
+                        <label>文件名：
+                            <input type="text" name="name" />
+                        </label>
+                        <label>上传文件：
+                            <input type="file" name="upload_file"/>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label>文件类型：</label>
+                        <select name="file_type">
+                            <option value="pic" selected="selected">图片</option>
+                            <option value="pdf" >PDF</option>
+                            <option value="others" >其它</option>
+                        </select>
+
+                        <label>类别：</label>
+                        <select name="category">
+                            <option value="apply" selected="selected">申请单</option>
+                            <option value="MedRecord" >病历</option>
+                            <option value="invoice" >发票</option>
+                            <option value="express" >快递单</option>
+                        </select>
+                    </div>
+                    <input type="hidden" name="patient_id" value="{{ patient.id }}" />
+                    <div id="upload_file_tip">{{ msg }}</div>
+                    <div>
+                        <input type="submit" id="jsUploadFileBtn" value="保存" />
+                        <input type="button" id="jsUploadFileCancelBtn" value="取消" />
+                    </div>
+                    {% csrf_token %}
+                </form>
+            </div>
+            <div id="files">
+                    <div class="file_wrapper">
+                    <div class="file_title"><div>申请表：</div></div>
+                    {% for apply in all_applies %}
+                    <a href="{{ MEDIA_URL }}{{ apply.upload_file }}" target="_blank">
+                        <div class="file_item">
+                            <div class="apply"><div class="cell"></div></div>
+                            <div  class="file_name">{{ apply.name }}</div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                <div class="file_wrapper">
+                    <div class="file_title"><div>病&nbsp;&nbsp;历：</div></div>
+                    {% for record in all_MedRecords %}
+                        <a href="{{ MEDIA_URL }}{{ record.upload_file }}" target="_blank">
+                            <div class="file_item">
+                                <div class="record"><div class="cell"></div></div>
+                                <div class="file_name">{{ record.name }}</div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    </div>
+    {# 病人区域 end #}
+
+    {#    样本区域 start#}
+    <div id="specimen_district" class="box wp">
+        <div>
+            <h1 style="display:inline-block">样本信息</h1>
+            <button style="display:inline-block" id="addSpecimenBtn">添加样本</button>
+        </div>
+        <div class="dialogbox" id="addSpecimenDialog" >
+            <form autocomplete="off" id="jsAddSpecimenForm" >
+                <div>
+                    <label>样本编号：
+                        <input type="text" name="name" />
+                    </label>
+                </div>
+                <div>
+                    <label>原始编号：
+                        <input type="text" name="original_name" />
+                    </label>
+                </div>
+                <div>
+                    <label>取样部位：
+                        <input type="text" name="site" />
+                    </label>
+                </div>
+                <div>
+                    <label>样本类型：</label>
+                    <select name="sample_type">
+                        <option value="FFPE" selected="selected" >蜡块</option>
+                        <option value="BLOOD" >全血</option>
+                        <option value="FreshTissue" >新鲜组织</option>
+                        <option value="ParaffinSlice" >白片</option>
+                    </select>
+                </div>
+                <div>
+                    <label>数量：
+                        <input type="text" name="num"/>
+                    </label>
+                </div>
+                <div>
+                    <label>余样存放地点：
+                        <input type="text" name="location" />
+                    </label>
+                </div>
+                <div>
+                    <input type="hidden" name="patient_id" value="{{ patient.id }}" />
+                </div>
+                <div id="add_specimen_tip"></div>
+                <div>
+                    <input type="button" id="jsAddSpecimenBtn" value="保存" />
+                    <input type="button" id="jsAddSpecimenCancelBtn" value="取消" />
+                </div>
+            {% csrf_token %}
+            </form>
+        </div>
+
+        {% for specimen in all_specimens %}
+        <form class="editSpecimenForm" specimen_id="{{specimen.id }}">
+            <div>
+                ({{ forloop.counter }})
+                <label>样本编号：
+                    <input type="text" name="name" value="{{ specimen.name }}"/>
+                </label>
+
+                <label>原始编号：
+                    <input type="text" name="original_name" value="{{ specimen.original_name }}"/>
+                </label>
+            </div>
+
+            <div>
+                <label>取样部位：
+                    <input type="text" name="site" value="{{ specimen.site }}" />
+                </label>
+                <label>余样存放地点：
+                    <input type="text" name="location" value="{{ specimen.location }}" />
+                </label>
+            </div>
+
+            <div>
+                <label>样本类型：</label>
+                <select name="sample_type">
+                    <option value="FFPE"
+                            {% if specimen.sample_type == 'FFPE' %}selected="selected"{% endif %}>蜡块</option>
+                    <option value="BLOOD"
+                            {% if specimen.sample_type == 'BLOOD' %}selected="selected"{% endif %}>全血</option>
+                    <option value="FreshTissue"
+                            {% if specimen.sample_type == 'FreshTissue' %}selected="selected"{% endif %}>新鲜组织</option>
+                    <option value="ParaffinSlice"
+                            {% if specimen.sample_type == 'ParaffinSlice' %}selected="selected"{% endif %}>白片</option>
+                </select>
+                <label>数量(
+                    {% if specimen.sample_type == 'ParaffinSlice' %}
+                        片
+                    {% elif specimen.sample_type == 'BLOOD' %}
+                        管
+                    {% else %}
+                        块
+                    {% endif %}
+                    )：
+                    <input type="text" name="num" value="{{ specimen.num }}"/>
+                </label>
+            </div>
+
+            <input type="hidden" name="specimen_id" value="{{ specimen.id }}" />
+            <div class="edit_specimen_tip" specimen_id="{{ specimen.id }}"></div>
+            {% csrf_token %}
+            <input type="button" class="jsEditSpecimenBtn" value="修改样本信息" specimen_id="{{ specimen.id }}" />
+        </form>
+        {% endfor %}
+    </div>
+    {#    样本区域 end#}
+
+    {#    订单区域 start#}
+    <div id="deal_district" class="box wp">
+        <div>
+            <h1 style="display:inline-block">订单信息</h1>
+            <button style="display:inline-block" id="addDealBtn">添加订单</button>
+        </div>
+        <div class="dialogbox" id="addDealDialog" >
+            <form autocomplete="off" id="jsAddDealForm" >
+                <div>
+                    <label>订单编号：
+                        <input type="text" name="name"/>
+                    </label>
+                </div>
+                <div>
+                    <label>应收价格：
+                        <input type="text" name="price"/>
+                    </label>
+                </div>
+                <div>
+                    <label>发票号：
+                        <input type="text" name="invoice"/>
+                    </label>
+                </div>
+                <div>
+                    <label>订单状态：</label>
+                    <select name="status">
+                        <option value="InProgress" selected="selected" >进行中</option>
+                        <option value="canceled" >已取消</option>
+                        <option value="finished" >已完结</option>
+                    </select>
+                </div>
+                <div>
+                    <label>支付状态：</label>
+                    <select name="pay_status">
+                        <option value="unpaied" selected="selected">未支付</option>
+                        <option value="paid" >已支付</option>
+                    </select>
+                </div>
+                <div>
+                    <input type="hidden" name="patient_id" value="{{ patient.id }}" />
+                </div>
+                <div id="add_deal_tip"></div>
+                <div>
+                    <input type="button" id="jsAddDealBtn" value="保存" />
+                    <input type="button" id="jsAddDealCancelBtn" value="取消" />
+                </div>
+            {% csrf_token %}
+            </form>
+        </div>
+
+        {% for deal in all_deals %}
+        <form class="editDealForm" deal_id="{{deal.id }}">
+            <div>
+                ({{ forloop.counter }})
+                <label>订单编号：
+                    <input type="text" name="name" value="{{ deal.name }}"/>
+                </label>
+
+                <label>订单状态：</label>
+                <select name="status">
+                    <option value="InProgress"
+                            {% if deal.status == 'InProgress' %}selected="selected"{% endif %}>进行中</option>
+                    <option value="canceled"
+                            {% if deal.status == 'canceled' %}selected="selected"{% endif %}>已取消</option>
+                    <option value="finished"
+                            {% if deal.status == 'finished' %}selected="selected"{% endif %}>已完结</option>
+                </select>
+            </div>
+
+            <div>
+                <label>应收价格（元）：
+                    <input type="text" name="price" value="{{ deal.price }}"/>
+                </label>
+
+                <label>付费状态：</label>
+                <select name="pay_status">
+                    <option value="unpaied"
+                            {% if deal.pay_status == 'unpaied' %}selected="selected"{% endif %} >未支付</option>
+                    <option value="paid"
+                            {% if deal.pay_status == 'paid' %}selected="selected"{% endif %} >已支付</option>
+                </select>
+            </div>
+
+            <div>
+                <label>发票号：
+                <input type="text" name="invoice" value="{{ deal.invoice }}"/>
+                </label>
+            </div>
+            <input type="hidden" name="deal_id" value="{{ deal.id }}" />
+            <div class="edit_deal_tip" deal_id="{{ deal.id }}"></div>
+            {% csrf_token %}
+            <input type="button" class="jsEditDealBtn" value="修改订单信息" deal_id="{{ deal.id }}" />
+        </form>
+        {% endfor %}
+    </div>
+    {#    订单区域 end#}
+
+    {% if all_specimens %}
+    {#    实验区域 start #}
+    <div id="experiment_district" class="box wp">
+        <div>
+            <h1 style="display:inline-block">实验信息</h1>
+            <button style="display:inline-block" id="addExperimentBtn">添加实验</button>
+        </div>
+        <div class="dialogbox" id="addExperimentDialog" >
+            <form autocomplete="off" id="jsAddExperimentForm" >
+                <div>
+                    <label>实验编号：
+                        <input type="text" name="name"/>
+                    </label>
+                    <label>实验状态：</label>
+                    <select name="status">
+                        <option value="InProgress" selected="selected">进行中</option>
+                        <option value="canceled" >已取消</option>
+                        <option value="finished" >已完结</option>
+                    </select>
+                </div>
+                <div>
+                    <label>应付价格（元）：
+                        <input type="text" name="price"/>
+                    </label>
+                    <label>实验结果：</label>
+                    <select name="result_status">
+                        <option value="unknown" selected="selected">未知</option>
+                        <option value="success">成功</option>
+                        <option value="fail">失败</option>
+                    </select>
+                    <label>支付状态：</label>
+                    <select name="pay_status">
+                        <option value="unpaied" selected="selected" >未支付</option>
+                        <option value="paid">已支付</option>
+                    </select>
+                </div>
+                <div>
+                    <label>实验类型：</label>
+                    <select name="experiment_type">
+                        <option value="WES" selected="selected" >全外显子测序</option>
+                        <option value="TS">RNA测序</option>
+                    </select>
+                </div>
+                <div>
+                    <label>快递公司：</label>
+                    <select name="express_company">
+                        <option value="SF" selected="selected">顺丰快递</option>
+                        <option value="YT">圆通快递</option>
+                        <option value="ST">申通快递</option>
+                        <option value="SF">韵达快递</option>
+                        <option value="ZS">自送</option>
+                    </select>
+                    <label>快递单号：
+                        <input type="text" name="express_number" />
+                    </label>
+                </div>
+                <div>
+                    <label>实验外包公司：</label>
+                    <select name="CRO_company">
+                        <option value="WuXi" selected="selected">药明康德</option>
+                        <option value="NovoGene">诺禾致源</option>
+                        <option value="CloudHealth">云健康</option>
+                    </select>
+                    <label>外包实验编号：
+                        <input type="text" name="CRO_name" />
+                    </label>
+                </div>
+                <div>
+                    <label>对应样本：
+                    {% for specimen in all_specimens %}
+                        <label>{{ specimen.name }}&nbsp;{{ specimen.get_sample_type_display }}
+                            <input class="check" type="checkbox" name="specimen_id_list" value="{{ specimen.id }}"/>
+                        </label>
+                    {% endfor %}
+                    </label>
+                </div>
+                <div>
+                    <label>对应订单：
+                    {% for deal in all_deals %}
+                        <label>{{ deal.name }}&nbsp;{{ deal.price }}元
+                            <input class="check" type="checkbox" name="deal_id_list" value="{{ deal.id }}" />
+                        </label>
+                    {% endfor %}
+                    </label>
+                </div>
+                <div>
+                    <input type="hidden" name="patient_id" value="{{ patient.id }}" />
+                </div>
+                <div id="add_Experiment_tip"></div>
+                <div>
+                    <input type="button" id="jsAddExperimentBtn" value="保存" />
+                    <input type="button" id="jsAddExperimentCancelBtn" value="取消" />
+                </div>
+            {% csrf_token %}
+            </form>
+        </div>
+        {% for experiment in all_experiments %}
+        <form class="editExperimentForm" experiment_id="{{experiment.id }}">
+            <div>
+                ({{ forloop.counter }})
+                <label>实验编号：
+                    <input type="text" name="name" value="{{ experiment.name }}"/>
+                </label>
+                <label>实验状态：</label>
+                <select name="status">
+                    <option value="InProgress"
+                            {% if experiment.status == 'InProgress' %}selected="selected"{% endif %}>进行中</option>
+                    <option value="canceled"
+                            {% if experiment.status == 'canceled' %}selected="selected"{% endif %}>已取消</option>
+                    <option value="finished"
+                            {% if experiment.status == 'finished' %}selected="selected"{% endif %}>已完结</option>
+                </select>
+
+            </div>
+
+            <div>
+                <label>应付价格（元）：
+                        <input type="text" name="price" value="{{ experiment.price }}"/>
+                </label>
+                <label>实验结果：</label>
+                <select name="result_status">
+                    <option value="unknown"
+                            {% if experiment.result_status == 'unknown' %}selected="selected"{% endif %}>未知</option>
+                    <option value="success"
+                            {% if experiment.result_status == 'success' %}selected="selected"{% endif %}>成功</option>
+                    <option value="fail"
+                            {% if experiment.result_status == 'fail' %}selected="selected"{% endif %}>失败</option>
+                </select>
+                <label>支付状态：</label>
+                <select name="pay_status">
+                    <option value="unpaied"
+                            {% if experiment.pay_status == 'unpaied' %}selected="selected"{% endif %}>未支付</option>
+                    <option value="paid"
+                            {% if experiment.pay_status == 'paid' %}selected="selected"{% endif %}>已支付</option>
+                </select>
+            </div>
+            <div>
+                <label>实验类型：</label>
+                <select name="experiment_type">
+                    <option value="WES"
+                            {% if experiment.experiment_type == 'WES' %}selected="selected"{% endif %}>全外显子测序</option>
+                    <option value="TS"
+                            {% if experiment.experiment_type == 'TS' %}selected="selected"{% endif %}>RNA测序</option>
+                </select>
+                <label>实验外包公司：</label>
+                <select name="CRO_company">
+                    <option value="WuXi"
+                            {% if experiment.CRO_company == 'WuXi' %}selected="selected"{% endif %}>药明康德</option>
+                    <option value="NovoGene"
+                            {% if experiment.CRO_company == 'NovoGene' %}selected="selected"{% endif %}>诺禾致源</option>
+                    <option value="CloudHealth"
+                            {% if experiment.CRO_company == 'CloudHealth' %}selected="selected"{% endif %}>云健康</option>
+                </select>
+                <label>外包实验编号：
+                    <input type="text" name="CRO_name" value="{{ experiment.CRO_name }}"/>
+                </label>
+            </div>
+
+            <div>
+                <label>快递公司：</label>
+                <select name="express_company">
+                    <option value="SF"
+                            {% if experiment.express_company == 'SF' %}selected="selected"{% endif %}>顺丰快递</option>
+                    <option value="YT"
+                            {% if experiment.express_company == 'YT' %}selected="selected"{% endif %}>圆通快递</option>
+                    <option value="ST"
+                            {% if experiment.express_company == 'ST' %}selected="selected"{% endif %}>申通快递</option>
+                    <option value="SF"
+                            {% if experiment.express_company == 'YD' %}selected="selected"{% endif %}>韵达快递</option>
+                    <option value="ZS"
+                            {% if experiment.express_company == 'ZS' %}selected="selected"{% endif %}>自送</option>
+                </select>
+                <label>快递单号：
+                    <input type="text" name="express_number" value="{{ experiment.express_number }}" />
+                </label>
+            </div>
+            <div>
+                <label>添加时间：
+                    <input type="text" name="add_time" id="experiment_add_time" value="{{ experiment.add_time | date:'Y-m-d'}}" />
+                </label>
+                <label>结束时间：
+                    <input type="text" name="finish_time" id="experiment_finish_time" value="{{ experiment.finish_time | date:'Y-m-d'}}" />
+                </label>
+            </div>
+            <div>
+                <label>对应样本：
+                {% for specimen in all_specimens %}
+                    <label>{{ specimen.name }}&nbsp;{{ specimen.get_sample_type_display }}</label>
+                        <input type="checkbox" name="specimen_id_list" value="{{ specimen.id }}"
+                            {% for exp_specimen in experiment.specimen.all %}
+                                {% if exp_specimen == specimen %}
+                                    checked="checked"
+                                {% endif %}
+                            {% endfor %}
+                        />
+                    </label>
+                {% endfor %}
+                </label>
+            </div>
+            <div>
+                <label>对应订单：
+                {% for deal in all_deals %}
+                    <label>{{ deal.name }}&nbsp;{{ deal.price }}元
+                        <input type="checkbox" name="deal_id_list" value="{{ deal.id }}"
+                               {% for exp_deal in experiment.deal.all %}
+                                   {% if exp_deal == deal %}
+                                       checked="checked"
+                                   {% endif %}
+                               {% endfor %}
+                        />
+                    </label>
+                {% endfor %}
+                </label>
+            </div>
+
+            <input type="hidden" name="experiment_id" value="{{ experiment.id }}" />
+            <div class="edit_experiment_tip" experiment_id="{{ experiment.id }}"></div>
+            {% csrf_token %}
+            <input type="button" class="jsEditExperimentBtn" value="修改实验信息" experiment_id="{{ experiment.id }}" />
+        </form>
+        {% endfor %}
+    </div>
+    {#    实验区域 end #}
+    {% endif %}
+
+    {% if all_experiments %}
+    {#    分析区域 start #}
+    <div id="analysis_district" class="box wp">
+        <div>
+            <h1 style="display:inline-block">分析信息</h1>
+            <button style="display:inline-block" id="addAnalysisBtn">添加分析</button>
+        </div>
+        <div class="dialogbox" id="addAnalysisDialog" >
+            <form autocomplete="off" id="jsAddAnalysisForm" >
+                <div>
+                    <label>分析编号：
+                        <input type="text" name="name"/>
+                    </label>
+                    <label>分析状态：</label>
+                    <select name="status">
+                        <option value="InProgress" selected="selected">进行中</option>
+                        <option value="canceled" >已取消</option>
+                        <option value="finished" >已完结</option>
+                    </select>
+                </div>
+                <div>
+                    <label>对应实验：
+                        {% for experiment in all_experiments %}
+                            <label>{{ experiment.name }}&nbsp;{{ experiment.price }}元
+                                <input class="check" type="checkbox" name="experiment_id_list" value="{{ experiment.id }}" />
+                            </label>
+                        {% endfor %}
+                    </label>
+                </div>
+                <div>
+                    <input type="hidden" name="patient_id" value="{{ patient.id }}" />
+                </div>
+                <div id="add_analysis_tip"></div>
+                <div>
+                    <input type="button" id="jsAddAnalysisBtn" value="保存" />
+                    <input type="button" id="jsAddAnalysisCancelBtn" value="取消" />
+                </div>
+                {% csrf_token %}
+            </form>
+        </div>
+        {% for analysis in all_analyses %}
+            <form class="editAnalysisForm" analysis_id="{{analysis.id }}">
+                <div>
+                    <label>分析编号：
+                        <input type="text" name="name" value="{{ analysis.name }}"/>
+                    </label>
+                    <label>实验状态：</label>
+                    <select name="status">
+                        <option value="InProgress"
+                                {% if analysis.status == 'InProgress' %}selected="selected"{% endif %}>进行中</option>
+                        <option value="canceled"
+                                {% if analysis.status == 'canceled' %}selected="selected"{% endif %}>已取消</option>
+                        <option value="finished"
+                                {% if analysis.status == 'finished' %}selected="selected"{% endif %}>已完结</option>
+                    </select>
+                </div>
+                <div>
+                    <label>添加时间：
+                        <input type="text" name="add_time" id="analysis_add_time" value="{{ analysis.add_time | date:'Y-m-d'}}" />
+                    </label>
+                    <label>结束时间：
+                        <input type="text" name="finish_time" id="analysis_finish_time" value="{{ analysis.finish_time | date:'Y-m-d'}}" />
+                    </label>
+                </div>
+                <div>
+                    <label>对应实验：</label>
+                    {% for experiment in all_experiments %}
+                        <label>{{ experiment.name }}&nbsp;{{ experiment.price }}元</label>
+                        <input type="checkbox" name="experiment_id_list" value="{{ experiment.id }}"
+                            {% for ana_experiment in analysis.experiment.all %}
+                                {% if ana_experiment == experiment %}
+                                    checked="checked"
+                                {% endif %}
+                            {% endfor %}
+                        />
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="analysis_id" value="{{ analysis.id }}" />
+                <div class="edit_analysis_tip" analysis_id="{{ analysis.id }}"></div>
+                {% csrf_token %}
+                <input type="button" class="jsEditAnalysisBtn" value="修改分析信息" analysis_id="{{ analysis.id }}" />
+            </form>
+        {% endfor %}
+    </div>
+    {#    分析区域 end #}
+    {% endif %}
+
+    {% if all_peptides %}
+    {#    多肽区域 start #}
+    <div id="peptide_district" class="box wp">
+        <div>
+            <h1 style="display:inline-block">多肽信息</h1>
+            <button style="display:inline-block" id="addPeptideBtn">添加多肽</button>
+        </div>
+        <div class="dialogbox" id="addPeptideDialog" >
+            <form autocomplete="off" id="jsAddPeptideForm" >
+                <div>
+                    <label>多肽编号：
+                        <input type="text" name="name" />
+                    </label>
+                    <label>合成状态：</label>
+                    <select name="status">
+                        <option value="InProgress" selected="selected" >进行中</option>
+                        <option value="canceled" >已取消</option>
+                        <option value="finished" >已完结</option>
+                    </select>
+                </div>
+                <div>
+                    <label>外包合成公司：</label>
+                    <select name="CRO_company">
+                        <option value="gl" selected="selected" >吉尔</option>
+                        <option value="cp" >中肽</option>
+                    </select>
+                    <label>外包合成编号：
+                        <input type="text" name="CRO_name"  />
+                    </label>
+                </div>
+                <div>
+                    <label>合成条数：
+                        <input type="text" name="num" />
+                    </label>
+                    <labe>规格：
+                        <input type="text" name="quantity" />
+                        <select name="unit">
+                            <option value="mg" selected="selected" >毫克</option>
+                            <option value="g" >克</option>
+                        </select>
+                    </labe>
+                </div>
+                <div>
+                    <label>应付价格（元）：
+                        <input type="text" name="price" />
+                    </label>
+                    <label>支付状态：
+                        <select name="pay_status">
+                            <option value="unpaied" selected="selected" >未支付</option>
+                            <option value="paid" }>已支付</option>
+                        </select>
+                    </label>
+                </div>
+                <div>
+                    <label>对应分析：</label>
+                    {% for analysis in all_analyses %}
+                        <label>{{ analysis.name }}&nbsp;始于{{ analysis.add_time | date:'Y-m-d' }}
+                            <input class="check" type="checkbox" name="analysis_id_list" value="{{ analysis.id }}" />
+                        </label>
+                    {% endfor %}
+                </div>
+                <div>
+                    <input type="hidden" name="patient_id" value="{{ patient.id }}" />
+                </div>
+                <div id="add_peptide_tip"></div>
+                <div>
+                    <input type="button" id="jsAddPeptideBtn" value="保存" />
+                    <input type="button" id="jsAddPeptideCancelBtn" value="取消" />
+                </div>
+            {% csrf_token %}
+            </form>
+        </div>
+        {% for peptide in all_peptides %}
+            <form class="editPeptideForm" peptide_id="{{peptide.id }}">
+                <div>
+                    <label>多肽编号：
+                        <input type="text" name="name" value="{{ peptide.name }}"/>
+                    </label>
+                    <label>合成状态：</label>
+                    <select name="status">
+                        <option value="InProgress"
+                                {% if peptide.status == 'InProgress' %}selected="selected"{% endif %}>进行中</option>
+                        <option value="canceled"
+                                {% if peptide.status == 'canceled' %}selected="selected"{% endif %}>已取消</option>
+                        <option value="finished"
+                                {% if peptide.status == 'finished' %}selected="selected"{% endif %}>已完结</option>
+                    </select>
+                </div>
+                <div>
+                    <label>外包合成公司：</label>
+                    <select name="CRO_company">
+                        <option value="gl"
+                                {% if peptide.CRO_company == 'gl' %}selected="selected"{% endif %}>吉尔</option>
+                        <option value="cp"
+                                {% if peptide.CRO_company == 'cp' %}selected="selected"{% endif %}>中肽</option>
+                    </select>
+                    <label>外包合成编号：
+                        <input type="text" name="CRO_name" value="{{ peptide.CRO_name }}" />
+                    </label>
+                </div>
+                <div>
+                    <label>合成条数：
+                        <input type="text" name="num" value="{{ peptide.num }}" />
+                    </label>
+                    <labe>规格：
+                        <input type="text" name="quantity" value="{{ peptide.quantity }}" />
+                        <select name="unit">
+                            <option value="mg"
+                                    {% if peptide.unit == 'mg' %}selected="selected"{% endif %}>毫克</option>
+                            <option value="g"
+                                    {% if peptide.unit == 'g' %}selected="selected"{% endif %}>克</option>
+                        </select>
+                    </labe>
+                </div>
+                <div>
+                    <label>应付价格（元）：
+                        <input type="text" name="price" value="{{ peptide.price }}"/>
+                    </label>
+                    <label>支付状态：
+                        <select name="pay_status">
+                            <option value="unpaied"
+                                {% if peptide.pay_status == 'unpaied' %}selected="selected"{% endif %}>未支付</option>
+                            <option value="paid"
+                                {% if peptide.pay_status == 'paid' %}selected="selected"{% endif %}>已支付</option>
+                        </select>
+                    </label>
+                </div>
+                <div>
+                    <label>添加时间：
+                        <input type="text" name="add_time" id="peptide_add_time" value="{{ peptide.add_time | date:'Y-m-d'}}" />
+                    </label>
+                    <label>结束时间：
+                        <input type="text" name="finish_time" id="peptide_finish_time" value="{{ peptide.finish_time | date:'Y-m-d'}}" />
+                    </label>
+                </div>
+                <div>
+                    <label>对应分析：</label>
+                    {% for analysis in all_analyses %}
+                        <label>{{ analysis.name }}&nbsp;始于{{ analysis.add_time | date:'Y-m-d' }}</label>
+                        <input type="checkbox" name="analysis_id_list" value="{{ analysis.id }}"
+                            {% for pep_analysis in peptide.analysis.all %}
+                                {% if pep_analysis == analysis %}
+                                    checked="checked"
+                                {% endif %}
+                            {% endfor %}
+                        />
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="peptide_id" value="{{ peptide.id }}" />
+                <div class="edit_peptide_tip" peptide_id="{{ peptide.id }}"></div>
+                {% csrf_token %}
+                <input type="button" class="jsEditPeptideBtn" value="修改多肽信息" peptide_id="{{ peptide.id }}" />
+
+            </form>
+        {% endfor %}
+    </div>
+    {#    多肽区域 end #}
+    {% endif %}
+
+    {% if all_peptides %}
+    {#    疫苗区域 start #}
+    <div id="vaccine_district" class="box wp">
+        <div>
+            <h1 style="display:inline-block">疫苗信息</h1>
+            <button style="display:inline-block" id="addVaccineBtn">添加疫苗</button>
+        </div>
+        <div class="dialogbox" id="addVaccineDialog" >
+            <form autocomplete="off" id="jsAddVaccineForm" >
+                <div>
+                    <label>疫苗编号：
+                        <input type="text" name="name" />
+                    </label>
+                    <label>制备状态：</label>
+                    <select name="status">
+                        <option value="InProgress" selected="selected" >进行中</option>
+                        <option value="canceled" >已取消</option>
+                        <option value="finished" >已完结</option>
+                    </select>
+                </div>
+                <div>
+                    <label>快递公司：</label>
+                    <select name="express_company">
+                        <option value="SF" selected="selected">顺丰快递</option>
+                        <option value="YT">圆通快递</option>
+                        <option value="ST">申通快递</option>
+                        <option value="SF">韵达快递</option>
+                    </select>
+                    <label>快递单号：
+                        <input type="text" name="express_number" />
+                    </label>
+                </div>
+                <div>
+                    <label>对应多肽：</label>
+                    {% for peptide in all_peptides %}
+                        <label>{{ peptide.name }}&nbsp;{{ peptide.price }}元
+                            <input class="check" type="checkbox" name="peptide_id_list" value="{{ peptide.id }}" />
+                        </label>
+                    {% endfor %}
+                </div>
+                <div>
+                    <input type="hidden" name="patient_id" value="{{ patient.id }}" />
+                </div>
+                <div id="add_vaccine_tip"></div>
+                <div>
+                    <input type="button" id="jsAddVaccineBtn" value="保存" />
+                    <input type="button" id="jsAddVaccineCancelBtn" value="取消" />
+                </div>
+            {% csrf_token %}
+            </form>
+        </div>
+        {% for vaccine in all_vaccines %}
+            <form class="editVaccineForm" vaccine_id="{{vaccine.id }}">
+                <div>
+                    <label>疫苗编号：
+                        <input type="text" name="name" value="{{ vaccine.name }}"/>
+                    </label>
+                    <label>制备状态：</label>
+                    <select name="status">
+                        <option value="InProgress"
+                                {% if vaccine.status == 'InProgress' %}selected="selected"{% endif %}>进行中</option>
+                        <option value="canceled"
+                                {% if vaccine.status == 'canceled' %}selected="selected"{% endif %}>已取消</option>
+                        <option value="finished"
+                                {% if vaccine.status == 'finished' %}selected="selected"{% endif %}>已完结</option>
+                    </select>
+                </div>
+                <div>
+                    <label>快递公司：</label>
+                    <select name="express_company">
+                        <option value="SF"
+                                {% if vaccine.express_company == 'SF' %}selected="selected"{% endif %}>顺丰快递</option>
+                        <option value="YT"
+                                {% if vaccine.express_company == 'YT' %}selected="selected"{% endif %}>圆通快递</option>
+                        <option value="ST"
+                                {% if vaccine.express_company == 'ST' %}selected="selected"{% endif %}>申通快递</option>
+                        <option value="SF"
+                                {% if vaccine.express_company == 'YD' %}selected="selected"{% endif %}>韵达快递</option>
+                    </select>
+                    <label>快递单号：
+                        <input type="text" name="express_number" value="{{ vaccine.express_number }}" />
+                    </label>
+                </div>
+                <div>
+                    <label>添加时间：
+                        <input type="text" name="add_time" id="peptide_add_time" value="{{ vaccine.add_time | date:'Y-m-d'}}" />
+                    </label>
+                    <label>结束时间：
+                        <input type="text" name="finish_time" id="peptide_finish_time" value="{{ vaccine.finish_time | date:'Y-m-d'}}" />
+                    </label>
+                </div>
+                <div>
+                    <label>对应多肽：</label>
+                    {% for peptide in all_peptides %}
+                        <label>{{ peptide.name }}&nbsp;{{ peptide.price }}元</label>
+                        <input type="checkbox" name="peptide_id_list" value="{{ peptide.id }}"
+                            {% for vac_peptide in vaccine.peptide.all %}
+                                {% if vac_peptide == peptide %}
+                                    checked="checked"
+                                {% endif %}
+                            {% endfor %}
+                        />
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="vaccine_id" value="{{ vaccine.id }}" />
+                <div class="edit_vaccine_tip" vaccine_id="{{ vaccine.id }}"></div>
+                {% csrf_token %}
+                <input type="button" class="jsEditVaccineBtn" value="修改疫苗信息" vaccine_id="{{ vaccine.id }}" />
+            </form>
+        {% endfor %}
+    </div>
+    {#    疫苗区域 end #}
+    {% endif %}
+
+{% endblock %}
+
+{% block custom_js %}
+    <script type="text/javascript">
+        laydate.render({
+        elem: '#patient_add_time',
+        format: 'yyyy-MM-dd',
+        });
+
+        $('#jsEditPatientBtn').on('click',function(){
+            var _self = $(this),
+                $jsEditPatientBtn= $('#jsEditPatientBtn'),
+                $edit_patient_tip = $('#edit_patient_tip')
+            $.ajax({
+                cache: false,
+                type: 'post',
+                dataType: 'json',
+                url: "/edit_patient/",
+                data: $('#editPatientForm').serialize(),
+                async: true,
+                beforeSend: function(XMLHttpRequest){
+                    _self.val("提交中...");
+                    $jsEditPatientBtn.attr('disabled', true);
+                },
+                success: function(data){
+                    if(data.status == 'success'){
+                        $edit_patient_tip.html('病人信息修改成功');
+                        setTimeout(function(){
+                            window.location.href = window.location.href;
+                            },1500);
+                    }else if (data.status == 'fail') {
+                        $edit_patient_tip.html('');
+                        if (data.errors.name) {
+                            $edit_patient_tip.append("病人编号："+ data.errors.name + "<br>")
+                        }
+                        if (data.errors.age) {
+                            $edit_patient_tip.append("年龄："+ data.errors.age + "<br>")
+                        }
+                        if (data.errors.id_card) {
+                            $edit_patient_tip.append("身份证号："+ data.errors.id_card + "<br>")
+                        }
+                        if (data.errors.mobile) {
+                            $edit_patient_tip.append("手机号："+ data.errors.mobile + "<br>")
+                        }
+                        $edit_patient_tip.append(
+                            '病人信息修改失败！'
+                        );
+                    }
+                },
+                complete: function(XMLHttpRequest) {
+                    _self.val("修改提交");
+                    _self.removeAttr("disabled");
+                }
+            })
+        })
+
+        $('#addDealBtn').on('click',function(){
+            $('#addDealDialog').show()
+        })
+
+        $('#jsAddDealBtn').on('click',function(){
+            var _self = $(this),
+                $jsAddDealForm=$('#jsAddDealForm')
+            $.ajax({
+                cache: false,
+                type: 'post',
+                dataType: 'json',
+                url: "/add_deal/",
+                data: $jsAddDealForm.serialize(),
+                async: true,
+                beforeSend: function(XMLHttpRequest){
+                    _self.val("保存中...");
+                    _self.attr('disabled', true);
+                },
+                success: function(data){
+                    if(data.status == 'success'){
+                        $('#add_deal_tip').html('订单添加成功');
+                        setTimeout(function(){
+                            window.location.href = window.location.href;
+                            },1500);
+                    }else if (data.status == 'fail') {
+                        if (data.errors.name) {
+                            $('#add_deal_tip').append("样本编号："+ data.errors.name +"<br>");
+                        }
+                        if (data.errors.price) {
+                            $('#add_deal_tip').append("价格：" + data.errors.price +"<br>");
+                        }
+                        if (data.errors.invoice) {
+                            $('#add_deal_tip').append("发票：" + data.errors.invoice +"<br>");
+                        }
+                        $('#add_deal_tip').append(
+                            '订单添加失败！'
+                        );
+                    }
+                },
+                complete: function(XMLHttpRequest) {
+                    _self.val("保存");
+                    _self.removeAttr("disabled");
+                }
+            })
+        })
+
+        $('#jsAddDealCancelBtn').on('click',function(){
+            $('#jsAddDealForm label input').val('');
+            $('#add_deal_tip').html('');
+            $('#addDealDialog').css("display","none");
+        })
+
+        $('.jsEditDealBtn').on('click',function () {
+            var _self = $(this);
+            var deal_id = _self.attr('deal_id');
+            var $editDealForm = $("form[class='editDealForm'][deal_id='"+deal_id+"']");
+            var $edit_deal_tip = $(".edit_deal_tip[deal_id='"+deal_id+"']");
+            $.ajax({
+                cache: false,
+                type: 'post',
+                dataType: 'json',
+                url: "/edit_deal/",
+                data: $editDealForm.serialize(),
+                async: true,
+                beforeSend: function(XMLHttpRequest){
+                    _self.val("提交中...");
+                    $(".jsEditDealBtn").attr('disabled', true);
+                },
+                success: function(data){
+                    if(data.status == 'success'){
+                        $edit_deal_tip.html('订单修改成功');
+                        setTimeout(function(){
+                            window.location.href = window.location.href;
+                            },1500);
+                    }else if (data.status == 'fail') {
+                        $edit_deal_tip.html('');
+                        if (data.errors.name) {
+                            $edit_deal_tip.append("样本编号："+ data.errors.name +"<br>");
+                        }
+                        if (data.errors.price) {
+                            $edit_deal_tip.append("价格：" + data.errors.price +"<br>");
+                        }
+                        if (data.errors.invoice) {
+                            $edit_deal_tip.append("发票：" + data.errors.invoice +"<br>");
+                        }
+                        $edit_deal_tip.append(
+                            '订单添加失败！'
+                        );
+                    }
+                },
+                complete: function(XMLHttpRequest) {
+                    _self.val("修改提交");
+                    _self.removeAttr("disabled");
+                }
+            })
+
+        })
+
+        $('#addSpecimenBtn').on('click',function(){
+            $('#jsAddSpecimenForm label input').val('');
+            $('#add_specimen_tip').html('');
+            $('#addSpecimenDialog').show();
+        })
+
+        $('#jsAddSpecimenBtn').on('click',function () {
+            var _self = $(this),
+                $jsAddSpecimenForm=$('#jsAddSpecimenForm')
+            $.ajax({
+                cache: false,
+                type: 'post',
+                dataType: 'json',
+                url: "/add_specimen/",
+                data: $jsAddSpecimenForm.serialize(),
+                async: true,
+                beforeSend: function(XMLHttpRequest){
+                    _self.val("保存中...");
+                    _self.attr('disabled', true);
+                },
+                success: function(data){
+                    if(data.status == 'success'){
+                        $('#add_specimen_tip').html('订单添加成功');
+                        setTimeout(function(){
+                            window.location.href = window.location.href;
+                            },1500);
+                    }else if (data.status == 'fail') {
+                        if (data.errors.name) {
+                            $('#add_specimen_tip').append("样本编号："+ data.errors.name +"<br>");
+                        }
+                        if (data.errors.original_name) {
+                            $('#add_specimen_tip').append("原始编号：" + data.errors.original_name +"<br>");
+                        }
+                        if (data.errors.num) {
+                            $('#add_specimen_tip').append("数量：" + data.errors.num +"<br>");
+                        }
+                        $('#add_specimen_tip').append(
+                            '订单添加失败！'
+                        );
+                    }
+                },
+                complete: function(XMLHttpRequest) {
+                    _self.val("保存");
+                    _self.removeAttr("disabled");
+                }
+            })
+        })
+
+        $('#jsAddSpecimenCancelBtn').on('click',function(){
+            $('#jsAddSpecimenForm label input').val('');
+            $('#addSpecimenDialog').css("display","none");
+        })
+
+        $('.jsEditSpecimenBtn').on('click',function() {
+            var _self = $(this);
+            var specimen_id = _self.attr('specimen_id');
+            var $editSpecimenForm = $("form[class='editSpecimenForm'][specimen_id='" + specimen_id + "']");
+            var $edit_specimen_tip = $(".edit_specimen_tip[specimen_id='" + specimen_id + "']");
+            $.ajax({
+                cache: false,
+                type: 'post',
+                dataType: 'json',
+                url: "/edit_specimen/",
+                data: $editSpecimenForm.serialize(),
+                async: true,
+                beforeSend: function (XMLHttpRequest) {
+                    _self.val("提交中...");
+                    $(".jsEditSpecimenBtn").attr('disabled', true);
+                },
+                success: function (data) {
+                    if (data.status == 'success') {
+
+                        $edit_specimen_tip.html('订单修改成功');
+                        setTimeout(function () {
+                            window.location.href = window.location.href;
+                        }, 1500);
+                    } else if (data.status == 'fail') {
+                        $($edit_specimen_tip).html('');
+                        if (data.errors.name) {
+                            $($edit_specimen_tip).append("样本编号：" + data.errors.name + "<br>");
+                        }
+                        if (data.errors.num){
+                            $($edit_specimen_tip).append("数量：" + data.errors.num + "<br>");
+                        }
+                        $($edit_specimen_tip).append(
+                            '订单添加失败！'
+                        );
+                    }
+                },
+                complete: function (XMLHttpRequest) {
+                    _self.val("修改提交");
+                    _self.removeAttr("disabled");
+                }
+            })
+        })
+
+        $('#addExperimentBtn').on('click',function(){
+            $('#addExperimentDialog').show();
+        })
+
+        $('#jsAddExperimentBtn').on('click',function(){
+            var _self = $(this),
+                $jsAddExperimentForm=$('#jsAddExperimentForm'),
+                $add_experiment_tip = $('#add_Experiment_tip');
+            $add_experiment_tip.html('');
+            $.ajax({
+                cache: false,
+                type: 'post',
+                dataType: 'json',
+                url: "/add_experiment/",
+                data: $jsAddExperimentForm.serialize(),
+                async: true,
+                beforeSend: function(XMLHttpRequest){
+                    _self.val("保存中...");
+                    _self.attr('disabled', true);
+                },
+                success: function(data){
+                    if(data.status == 'success'){
+                        $add_experiment_tip.html('实验添加成功');
+                        setTimeout(function(){
+                            window.location.href = window.location.href;
+                            },1500);
+                    }else if (data.status == 'fail') {
+                        if (data.errors.name) {
+                            $add_experiment_tip.append("实验编号：" + data.errors.name + "<br>");
+                        }
+                         if (data.errors.price) {
+                            $add_experiment_tip.append("应付价格：" + data.errors.price + "<br>");
+                        }
+                        $add_experiment_tip.append(
+                            '实验添加失败！'
+                        );
+                    }
+                },
+                complete: function(XMLHttpRequest) {
+                    _self.val("保存");
+                    _self.removeAttr("disabled");
+                }
+            })
+        })
+
+        $('#jsAddExperimentCancelBtn').on('click',function(){
+            $('#jsAddExperimentForm label input:not(.check)').val('');
+            $('#jsAddExperimentForm label label input').removeAttr('checked');
+            $('#add_Experiment_tip').html('');
+            $('#addExperimentDialog').css("display","none")
+        })
+
+        $('.jsEditExperimentBtn').on('click',function(){
+            var _self = $(this),
+                experiment_id = _self.attr('experiment_id'),
+                $editExperimentForm = $("form[class='editExperimentForm'][experiment_id='" + experiment_id + "']"),
+                $edit_experiment_tip = $(".edit_experiment_tip[experiment_id='" + experiment_id + "']")
+            $.ajax({
+                cache: false,
+                type: 'post',
+                dataType: 'json',
+                url: "/edit_experiment/",
+                data: $editExperimentForm.serialize(),
+                async: true,
+                beforeSend: function (XMLHttpRequest) {
+                    _self.val("提交中...");
+                    $(".jsEditExprimentBtn").attr('disabled', true);
+                },
+                success: function (data) {
+                    if (data.status == 'success') {
+                        $edit_experiment_tip.html('实验修改成功');
+                        setTimeout(function () {
+                            window.location.href = window.location.href;
+                        }, 1500);
+                    } else if (data.status == 'fail') {
+                        $($edit_experiment_tip).html('');
+                        if (data.errors.name) {
+                            $($edit_experiment_tip).append("实验编号：" + data.errors.name + "<br>");
+                        }
+                         if (data.errors.price) {
+                            $($edit_experiment_tip).append("应付价格：" + data.errors.price + "<br>");
+                        }
+                        if (data.errors.add_time) {
+                            $($edit_experiment_tip).append("添加时间：" + data.errors.add_time + "<br>");
+                        }
+                        if (data.errors.finish_time) {
+                            $($edit_experiment_tip).append("结束时间：" + data.errors.finish_time + "<br>");
+                        }
+                        $($edit_experiment_tip).append(
+                            '订单添加失败！'
+                        );
+                    }
+                },
+                complete: function (XMLHttpRequest) {
+                    _self.val("修改提交");
+                    _self.removeAttr("disabled");
+                }
+            })
+        })
+
+        $('#addAnalysisBtn').on('click',function(){
+            $('#addAnalysisDialog').show()
+        })
+
+        $('#jsAddAnalysisBtn').on('click',function(){
+            var _self = $(this),
+                $jsAddAnalysisForm=$('#jsAddAnalysisForm'),
+                $add_analysis_tip = $('#add_analysis_tip');
+            $add_analysis_tip.html('');
+            $.ajax({
+                cache: false,
+                type: 'post',
+                dataType: 'json',
+                url: "/add_analysis/",
+                data: $jsAddAnalysisForm.serialize(),
+                async: true,
+                beforeSend: function (XMLHttpRequest) {
+                    _self.val("保存中...");
+                    _self.attr('disabled', true);
+                },
+                success: function(data){
+                    if(data.status == 'success'){
+                        $add_analysis_tip.html('分析添加成功');
+                        setTimeout(function(){
+                            window.location.href = window.location.href;
+                            },1500);
+                    }else if (data.status == 'fail') {
+                        if (data.errors.name) {
+                            $add_analysis_tip.append("分析编号：" + data.errors.name + "<br>");
+                        }
+                        $add_analysis_tip.append(
+                            '分析添加失败！'
+                        );
+                    }
+                },
+                complete: function(XMLHttpRequest) {
+                    _self.val("保存");
+                    _self.removeAttr("disabled");
+                }
+            })
+        })
+
+        $('#jsAddAnalysisCancelBtn').on('click',function(){
+            $('#jsAddAnalysisForm label input:not(.check)').val('');
+            $('#jsAddAnalysisForm label input').removeAttr('checked');
+            $('#add_analysis_tip').html('');
+            $('#addAnalysisDialog').css("display","none")
+        })
+
+        $('.jsEditAnalysisBtn').on('click',function(){
+            var _self = $(this),
+                analysis_id = _self.attr('analysis_id'),
+                $editAnalysisForm = $("form[class='editAnalysisForm'][analysis_id='" + analysis_id + "']"),
+                $edit_analysis_tip = $(".edit_analysis_tip[analysis_id='" + analysis_id + "']");
+            $.ajax({
+                cache: false,
+                type: 'post',
+                dataType: 'json',
+                url: "/edit_analysis/",
+                data: $editAnalysisForm.serialize(),
+                async: true,
+                beforeSend: function (XMLHttpRequest) {
+                    _self.val("提交中...");
+                    $(".jsEditAnalysisBtn").attr('disabled', true);
+                },
+                success: function (data) {
+                    if (data.status == 'success') {
+                        $edit_analysis_tip.html('分析修改成功');
+                        setTimeout(function () {
+                            window.location.href = window.location.href;
+                        }, 1500);
+                    } else if (data.status == 'fail') {
+                        $edit_analysis_tip.html('');
+                        if (data.errors.name) {
+                            $edit_analysis_tip.append("分析编号：" + data.errors.name + "<br>");
+                        }
+                        if (data.errors.add_time) {
+                            $edit_analysis_tip.append("添加时间：" + data.errors.add_time + "<br>");
+                        }
+                        if (data.errors.finish_time) {
+                            $edit_analysis_tip.append("结束时间：" + data.errors.finish_time + "<br>");
+                        }
+                        $edit_analysis_tip.append(
+                            '分析修改失败！'
+                        );
+                    }
+                },
+                complete: function (XMLHttpRequest) {
+                    _self.val("修改提交");
+                    $(".jsEditAnalysisBtn").removeAttr("disabled");
+                }
+            })
+        })
+
+        $('#addPeptideBtn').on('click',function(){
+            $('#addPeptideDialog').show()
+        })
+
+        $('#jsAddPeptideBtn').on('click',function(){
+            var _self = $(this),
+                $jsAddPeptideForm=$('#jsAddPeptideForm'),
+                $add_peptide_tip = $('#add_peptide_tip');
+            $.ajax({
+                cache: false,
+                type: 'post',
+                dataType: 'json',
+                url: "/add_peptide/",
+                data: $jsAddPeptideForm.serialize(),
+                async: true,
+                beforeSend: function (XMLHttpRequest) {
+                    _self.val("保存中...");
+                    _self.attr('disabled', true);
+                },
+                success: function(data){
+                    if(data.status == 'success'){
+                        $add_peptide_tip.html('多肽添加成功');
+                        setTimeout(function(){
+                            window.location.href = window.location.href;
+                            },1500);
+                    }else if (data.status == 'fail') {
+                        if (data.errors.name) {
+                            $add_peptide_tip.append("多肽编号：" + data.errors.name + "<br>");
+                        }
+                        if (data.errors.num) {
+                            $add_peptide_tip.append("合成条数：" + data.errors.num + "<br>");
+                        }
+                        if (data.errors.quantity) {
+                            $add_peptide_tip.append("规格：" + data.errors.quantity + "<br>");
+                        }
+                        if (data.errors.price) {
+                            $add_peptide_tip.append("应付价格：" + data.errors.price + "<br>");
+                        }
+                        $add_peptide_tip.append(
+                            '分析添加失败！'
+                        );
+                    }
+                },
+                complete: function(XMLHttpRequest) {
+                    _self.val("保存");
+                    _self.removeAttr("disabled");
+                }
+            })
+        })
+
+        $('#jsAddPeptideCancelBtn').on('click',function(){
+            $('#jsAddPeptideForm label input:not(.check)').val('');
+            $('#jsAddPeptideForm label input').removeAttr('checked');
+            $('#add_peptide_tip').html('');
+            $('#addPeptideDialog').css("display","none")
+        })
+
+        $('.jsEditPeptideBtn').on('click',function(){
+            var _self = $(this),
+                peptide_id = _self.attr('peptide_id'),
+                $editPeptideForm = $("form[class='editPeptideForm'][peptide_id='" + peptide_id + "']"),
+                $edit_peptide_tip = $(".edit_peptide_tip[peptide_id='" + peptide_id + "']");
+            $.ajax({
+                cache: false,
+                type: 'post',
+                dataType: 'json',
+                url: "/edit_peptide/",
+                data: $editPeptideForm.serialize(),
+                async: true,
+                beforeSend: function (XMLHttpRequest) {
+                    _self.val("提交中...");
+                    $(".jsEditPeptideBtn").attr('disabled', true);
+                },
+                success: function (data) {
+                    if (data.status == 'success') {
+                        $edit_peptide_tip.html('多肽修改成功');
+                        setTimeout(function () {
+                            window.location.href = window.location.href;
+                        }, 1500);
+                    } else if (data.status == 'fail') {
+                        $edit_peptide_tip.html('');
+                        if (data.errors.name) {
+                            $edit_peptide_tip.append("多肽编号：" + data.errors.name + "<br>");
+                        }
+                        if (data.errors.num) {
+                            $edit_peptide_tip.append("合成条数：" + data.errors.num + "<br>");
+                        }
+                        if (data.errors.quantity) {
+                            $edit_peptide_tip.append("规格：" + data.errors.quantity + "<br>");
+                        }
+                        if (data.errors.price) {
+                            $edit_peptide_tip.append("应付价格：" + data.errors.price + "<br>");
+                        }
+                        if (data.errors.add_time) {
+                            $edit_peptide_tip.append("添加时间：" + data.errors.add_time + "<br>");
+                        }
+                        if (data.errors.finish_time) {
+                            $edit_peptide_tip.append("结束时间：" + data.errors.finish_time + "<br>");
+                        }
+                        $edit_peptide_tip.append(
+                            '多肽修改失败！'
+                        );
+                    }
+                },
+                complete: function (XMLHttpRequest) {
+                    _self.val("修改提交");
+                    $(".jsEditPeptideBtn").removeAttr("disabled");
+                }
+            })
+        })
+
+        $('#addVaccineBtn').on('click',function(){
+            $('#addVaccineDialog').show()
+        })
+
+        $('#jsAddVaccineBtn').on('click',function(){
+            var _self = $(this),
+                $jsAddVaccineForm=$('#jsAddVaccineForm'),
+                $add_vaccine_tip = $('#add_vaccine_tip');
+            $.ajax({
+                cache: false,
+                type: 'post',
+                dataType: 'json',
+                url: "/add_vaccine/",
+                data: $jsAddVaccineForm.serialize(),
+                async: true,
+                beforeSend: function (XMLHttpRequest) {
+                    _self.val("保存中...");
+                    _self.attr('disabled', true);
+                },
+                success: function(data){
+                    if(data.status == 'success'){
+                        $add_vaccine_tip.html('疫苗添加成功');
+                        setTimeout(function(){
+                            window.location.href = window.location.href;
+                            },1500);
+                    }else if (data.status == 'fail') {
+                        if (data.errors.name) {
+                            $add_vaccine_tip.append("疫苗编号：" + data.errors.name + "<br>");
+                        }
+                        $add_vaccine_tip.append(
+                            '分析添加失败！'
+                        );
+                    }
+                },
+                complete: function(XMLHttpRequest) {
+                    _self.val("保存");
+                    _self.removeAttr("disabled");
+                }
+            })
+        })
+
+        $('#jsAddVaccineCancelBtn').on('click',function(){
+            $('#jsAddVaccineForm label input:not(.check)').val('');
+            $('#jsAddVaccineForm label input').removeAttr('checked');
+            $('#add_vaccine_tip').html('');
+            $('#addVaccineDialog').css("display","none")
+        })
+
+        $('.jsEditVaccineBtn').on('click',function(){
+            var _self = $(this),
+                vaccine_id = _self.attr('vaccine_id'),
+                $editVaccineForm = $("form[class='editVaccineForm'][vaccine_id='" + vaccine_id + "']"),
+                $edit_vaccine_tip = $(".edit_vaccine_tip[vaccine_id='" + vaccine_id + "']");
+            $.ajax({
+                cache: false,
+                type: 'post',
+                dataType: 'json',
+                url: "/edit_vaccine/",
+                data: $editVaccineForm.serialize(),
+                async: true,
+                beforeSend: function (XMLHttpRequest) {
+                    _self.val("提交中...");
+                    $(".jsEditVaccineBtn").attr('disabled', true);
+                },
+                success: function (data) {
+                    if (data.status == 'success') {
+                        $edit_vaccine_tip.html('疫苗修改成功');
+                        setTimeout(function () {
+                            window.location.href = window.location.href;
+                        }, 1500);
+                    } else if (data.status == 'fail') {
+                        $edit_vaccine_tip.html('');
+                        if (data.errors.name) {
+                            $edit_vaccine_tip.append("疫苗编号：" + data.errors.name + "<br>");
+                        }
+                        if (data.errors.add_time) {
+                            $edit_vaccine_tip.append("添加时间：" + data.errors.add_time + "<br>");
+                        }
+                        if (data.errors.finish_time) {
+                            $edit_vaccine_tip.append("结束时间：" + data.errors.finish_time + "<br>");
+                        }
+                        $edit_vaccine_tip.append(
+                            '疫苗修改失败！'
+                        );
+                    }
+                },
+                complete: function (XMLHttpRequest) {
+                    _self.val("修改提交");
+                    $(".jsEditVaccineBtn").removeAttr("disabled");
+                }
+            })
+        })
+
+        $('#uploadFileBtn').on('click',function(){
+            $('#uploadFileDialog').show();
+            $('#files').hide();
+        })
+
+        $('#jsUploadFileCancelBtn').on('click',function(){
+            $('#jsUploadFileForm label input').val('');
+            $('#upload_file_tip').html('');
+            $('#uploadFileDialog').css("display","none");
+            $('#files').show();
+        })
+
+
+    </script>
+{% endblock %}
+
